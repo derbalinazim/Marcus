@@ -2,6 +2,12 @@
 let products = []; 
 let globalPromos = [];
 
+// --- NOUVEAU: Fonction pour ouvrir/fermer le menu sur mobile ---
+function toggleMobileMenu() {
+    const nav = document.getElementById('categoryNav');
+    if (nav) nav.classList.toggle('active');
+}
+
 document.addEventListener('DOMContentLoaded', async () => {
     try {
         // 1. Récupération des produits depuis la base de données
