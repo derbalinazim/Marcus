@@ -262,6 +262,63 @@ cursor: pointer;
 .checkout-modal button[type="button"]:hover {
 color: #111 !important;
 }
+        /* إخفاء زر الثلاث خطوط في شاشة الحاسوب */
+.hamburger-menu {
+    display: none;
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    color: var(--text-main);
+    cursor: pointer;
+}
+
+/* =========================================
+   تعديلات الهاتف (شاشات أصغر من 768px)
+   ========================================= */
+@media (max-width: 768px) {
+    /* 1. إظهار زر "أضف إلى السلة" دائماً في الهاتف */
+    .btn-add {
+        opacity: 1 !important;
+    }
+
+    /* 2. إظهار زر القائمة (الثلاث خطوط) وتعديل الشريط */
+    .hamburger-menu {
+        display: block;
+        margin-bottom: 15px;
+    }
+    .nav-bar {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    /* 3. إخفاء التصنيفات افتراضياً وتحويلها لقائمة منسدلة */
+    .categories {
+        display: none; 
+        flex-direction: column;
+        width: 100%;
+        background-color: var(--bg-color);
+        padding-bottom: 10px;
+    }
+    .categories.active {
+        display: flex; /* إظهارها عند الضغط على الزر */
+    }
+    .cat-btn {
+        margin: 0 0 10px 0;
+        text-align: left;
+        font-size: 1.1rem;
+        padding: 10px 0;
+        border-bottom: 1px solid var(--border);
+        width: 100%;
+    }
+
+    /* 4. تعديل حجم مربع كود الخصم ليناسب الشاشة */
+    .promo-quick {
+        width: 100%;
+    }
+    .promo-quick input {
+        flex: 1;
+    }
+}
     </style>
 
     <!-- Meta Pixel Code -->
@@ -305,12 +362,17 @@ color: #111 !important;
 </header>
 
 <nav class="nav-bar">
-<div class="categories" id="categoryNav"></div>
-<!-- Champ Code Promo ajouté ici -->
-<div class="promo-quick">
-<input type="text" id="quickPromoInput" placeholder="Code Promo">
-<button onclick="applyQuickPromo()">Appliquer</button>
-</div>
+    <!-- زر القائمة المخصص للهاتف -->
+    <button class="hamburger-menu" onclick="toggleMobileMenu()">
+        <i class="fas fa-bars"></i> الأقسام
+    </button>
+    
+    <div class="categories" id="categoryNav"></div>
+    
+    <div class="promo-quick">
+        <input type="text" id="quickPromoInput" placeholder="Code Promo">
+        <button onclick="applyQuickPromo()">Appliquer</button>
+    </div>
 </nav>
 
 <main class="main-content">
