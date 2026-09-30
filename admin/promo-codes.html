@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MERCUS Admin | Codes Promo</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div class="admin-container">
+        <h2>
+            Gestion des Codes Promo
+            <div class="nav-links">
+                <a href="products.html">← Gérer les Produits</a>
+            </div>
+        </h2>
+        
+        <form id="addPromoForm">
+            <div class="form-group">
+                <label>Code Promotionnel (ex: SUMMER20)</label>
+                <input type="text" id="pCode" required>
+            </div>
+            <div class="form-group">
+                <label>Type de Remise</label>
+                <select id="pType" style="text-transform: none;">
+                    <option value="percent">Pourcentage (%)</option>
+                    <option value="fixed">Montant fixe (DZD)</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Valeur de la remise</label>
+                <input type="number" id="pValue" required style="text-transform: none;">
+            </div>
+            <button type="submit">Créer le Code Promo</button>
+        </form>
+
+        <div class="promo-list">
+            <h3>Codes Actifs</h3>
+            <div id="promoContainer">Chargement...</div>
+        </div>
+    </div>
+
+    <script>
+        async function loadPromos() {
+            try {
+                const response = await fetch('/api/promos');
+                const promos = await response.json();
+                
+                const container = document.getElementById('promoContainer');
+                if (promos.length === 0) {
+                    container.innerHTML = "<p style='color:#666; font-size:0.9rem;'>Aucun code promo actif.</p>";
+                    return;
+                }
+
+                container.innerHTML = promos.map(p => `
+                    <div class="promo-item">
+                        <div>
+                            <strong>${p.code}</strong><br>
+                            <span style="font-size:0.85rem; color:#666;">
+                                Remise : ${p.value}${p.type === 'percent' ? '%' : ' DZD'}
+                            </span>
+                        </div>
+                        <button class="btn-delete" onclick="deletePromo('${p.code}')">Supprimer</button>
+                    </div>
+                `).join('');
+            } catch (error) {
+                console.error("Erreur:", error);
+            }
+        }
+
+        document.getElementById('addPromoForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const newPromo = {
+                code: document.getElementById('pCode').value.toUpperCase().trim(),
+                type: document.getElementById('pType').value,
+                value: parseFloat(document.getElementById('pValue').value)
+            };
+            
+            try {
+                const response = await fetch('/api/promos', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(newPromo)
+                });
+                
+                const result = await response.json();
+                
+                if (result.error) {
+                    alert(result.error);
+                } else {
+                    this.reset();
+                    loadPromos(); 
+                }
+            } catch (error) {
+                alert("Erreur de connexion au serveur.");
+            }
+        });
+
+        async function deletePromo(code) {
+            if(confirm(`Êtes-vous sûr de vouloir supprimer le code ${code} ?`)) {
+                try {
+                    await fetch(`/api/promos/${code}`, { method: 'DELETE' });
+                    loadPromos(); 
+                } catch (error) {
+                    alert("Erreur lors de la suppression.");
+                }
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', loadPromos);
+    </script>
+</body>
+</html>

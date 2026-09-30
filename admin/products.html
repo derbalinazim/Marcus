@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MERCUS Admin | Produits</title>
+    
+    <!-- Lien vers le fichier CSS de l'administration -->
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div class="admin-container">
+        <h2>
+            Gestion des Produits
+            <div class="nav-links">
+                <a href="promo-codes.html">Gérer les Codes Promo →</a>
+            </div>
+        </h2>
+        
+        <form id="addProductForm">
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                <div class="form-group">
+                    <label>Titre du produit</label>
+                    <input type="text" id="aTitle" required>
+                </div>
+                <div class="form-group">
+                    <label>Catégorie</label>
+                    <select id="aCategory" required>
+                        <option value="Visage">Visage</option>
+                        <option value="Yeux">Yeux</option>
+                        <option value="Lèvres">Lèvres</option>
+                        <option value="Soins de la peau">Soins de la peau</option>
+                        <option value="Cheveux">Cheveux</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Prix (DZD)</label>
+                    <input type="number" id="aPrice" required>
+                </div>
+                <div class="form-group">
+                    <label>URL de l'image</label>
+                    <input type="url" id="aImage" required>
+                </div>
+            </div>
+            <div class="form-group" style="grid-column: 1 / -1;">
+    <label>Description du produit</label>
+    <textarea id="aDesc" rows="3" required style="width: 100%; padding: 12px; border: 1px solid var(--border); border-radius: 4px; font-family: var(--font-main); outline: none;"></textarea>
+</div>
+            
+            <div class="form-group checkbox-group">
+                <input type="checkbox" id="aIsNew">
+                <label for="aIsNew" style="margin:0;">Afficher le badge "NEW"</label>
+            </div>
+            
+            <button type="submit">Ajouter le produit</button>
+        </form>
+
+
+        <div class="product-list">
+            <h3>Produits en boutique</h3>
+            <div id="productContainer">Chargement des produits...</div>
+        </div>
+    </div>
+
+    <script>
+        // Charger les produits depuis la base de données
+        async function loadProducts() {
+            try {
+                const response = await fetch('/api/products');
+                const products = await response.json();
+                
+                const container = document.getElementById('productContainer');
+                if (products.length === 0) {
+                    container.innerHTML = "<p>Aucun produit dans la base de données.</p>";
+                    return;
+                }
+
+                container.innerHTML = products.map(p => `
+                    <div class="product-item">
+                        <div class="product-info">
+                            <img src="${p.img}" alt="${p.title}">
+                            <div>
+                                <strong>${p.title}</strong> ${p.isNew ? '<span class="badge-new">NEW</span>' : ''}<br>
+                                <span style="font-size:0.85rem; color:#666;">${p.cat} - ${p.price} DZD</span>
+                            </div>
+                        </div>
+                        <button class="btn-delete" onclick="deleteProduct(${p.id})">Supprimer</button>
+                    </div>
+                `).join('');
+            } catch (error) {
+                console.error("Erreur:", error);
+            }
+        }
+
+        // Ajouter un produit dans la base de données
+        document.getElementById('addProductForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const newProduct = {
+               title: document.getElementById('aTitle').value,
+              cat: document.getElementById('aCategory').value,
+              price: parseFloat(document.getElementById('aPrice').value),
+              img: document.getElementById('aImage').value,
+              desc: document.getElementById('aDesc').value, // Add this line
+              isNew: document.getElementById('aIsNew').checked
+             };
+            
+            try {
+                await fetch('/api/products', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(newProduct)
+                });
+                
+                this.reset();
+                loadProducts(); // Rafraîchir la liste
+                alert("Produit ajouté avec succès !");
+            } catch (error) {
+                alert("Erreur lors de l'ajout.");
+            }
+        });
+
+        // Supprimer un produit de la base de données
+        async function deleteProduct(id) {
+            if(confirm('Êtes-vous sûr de vouloir supprimer définitivement ce produit ?')) {
+                try {
+                    await fetch(`/api/products/${id}`, { method: 'DELETE' });
+                    loadProducts(); // Rafraîchir la liste
+                } catch (error) {
+                    alert("Erreur lors de la suppression.");
+                }
+            }
+        }
+
+        // Initialisation
+        document.addEventListener('DOMContentLoaded', loadProducts);
+    </script>
+</body>
+</html>
