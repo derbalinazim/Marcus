@@ -73,6 +73,10 @@ function toggleWishlist(id) {
 }
 
 function filterCategory(cat) {
+    // --- NOUVEAU : Fermer le menu sur mobile lors du choix d'une catégorie ---
+    const nav = document.getElementById('categoryNav');
+    if (nav) nav.classList.remove('active');
+
     isWishlistView = false; 
     const titleEl = document.getElementById('sectionTitle');
     if (titleEl) titleEl.innerText = cat === "Tous" ? "Notre Collection" : cat;
